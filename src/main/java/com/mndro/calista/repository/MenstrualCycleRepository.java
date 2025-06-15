@@ -3,6 +3,7 @@ package com.mndro.calista.repository;
 import com.mndro.calista.entity.MenstrualCycle;
 import com.mndro.calista.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
@@ -12,5 +13,8 @@ public interface MenstrualCycleRepository extends JpaRepository<MenstrualCycle, 
     List<MenstrualCycle> findAllByUserOrderByStartDateDesc(User user);
     MenstrualCycle findTopByUserAndIsActiveTrueOrderByStartDateDesc(User user);
     MenstrualCycle findTopByUserAndIsActiveFalseOrderByEndDateDesc(User user);
+    @Query("SELECT m FROM MenstrualCycle m WHERE m.isActive = true")
+    List<MenstrualCycle> findAllActiveCycles();
+
 }
 

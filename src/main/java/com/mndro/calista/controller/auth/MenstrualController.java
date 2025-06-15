@@ -44,11 +44,8 @@ public class MenstrualController {
 
     private final CyclePredictionService cyclePredictionService;
 
-    @Value("${python.api.url}")
-    private String pythonApiUrl;
 
-    @GetMapping("" +
-            "/active")
+    @GetMapping("/active")
     public ResponseEntity<?> getCurrentActiveMenstrual() {
         User user = getCurrentUserEntity();
         MenstrualCycle activeCycle = menstrualCycleRepository.findTopByUserAndIsActiveTrueOrderByStartDateDesc(user);
@@ -111,44 +108,6 @@ public class MenstrualController {
 
         menstrualCycleRepository.save(newCycle);
         return ResponseEntity.ok(Map.of("message", "Siklus baru dimulai", "cycleId", newCycle.getId()));
-    }
-
-
-    @PostMapping("/end")
-    public ResponseEntity<?> endCurrentCycle(@RequestBody Map<String, String> body) {
-        User user = getCurrentUserEntity();
-
-        MenstrualCycle activeCycle = menstrualCycleRepository.findTopByUserAndIsActiveTrueOrderByStartDateDesc(user);
-        if (activeCycle == null) return ResponseEntity.badRequest().body("Tidak ada siklus aktif");
-
-        LocalDate endDate = LocalDate.parse(body.get("endDate"));
-        LocalDate peakDate = LocalDate.parse(body.get("peakDate"));
-
-        int duration = (int) ChronoUnit.DAYS.between(activeCycle.getStartDate(), endDate) + 1;
-
-        activeCycle.setEndDate(endDate);
-        activeCycle.setPeakDate(peakDate);
-        activeCycle.setDuration(duration);
-        activeCycle.setIsIstihaadhah(duration > 15);
-        activeCycle.setIsActive(false);
-
-        menstrualCycleRepository.save(activeCycle);
-
-        // Call Python API to retrain model
-        String url = pythonApiUrl + "/train/"+user.getUserId();
-        Map<String, Object> predictionResult = restTemplate.postForObject(url, null, Map.class);
-
-        // Save prediction to EstimatedCycle
-        EstimatedCycle cycle = estimatedCycleRepository.findByUser(user).orElse(new EstimatedCycle());
-        cycle.setUser(user);
-        cycle.setIsActive(true);
-        cycle.setEstimatedCycleLength((Integer) predictionResult.get("predicted_cycle_length"));
-        cycle.setEstimatedPeriodLength((Integer) predictionResult.get("predicted_period_length"));
-        cycle.setLastPeriodStartDate(activeCycle.getStartDate());
-
-        estimatedCycleRepository.save(cycle);
-
-        return ResponseEntity.ok(Map.of("message", "Siklus ditutup dan prediksi disimpan", "prediction", predictionResult));
     }
 
     private User getCurrentUserEntity() {

@@ -55,6 +55,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(auth -> {
                     // allow credential
                     auth.requestMatchers("/api/v1/auth/login").permitAll();
+                    auth.requestMatchers("/api/v1/reminder/send-active-cycle").permitAll();
                     auth.requestMatchers("/api/v1/auth/register").permitAll();
                     auth.requestMatchers("/actuator/**").permitAll();
                     // set role credential
