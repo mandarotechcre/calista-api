@@ -39,28 +39,35 @@ public class ReminderService {
                 log.info("Marked istihadah for user {} on cycle {}", user.getUsername(), cycle.getId());
             }
 
-            String subject = "🌸 Keep Tracking Your Cycle with Calista!";
+            String subject = "🌸 Yuk Cek Siklus Haid-mu di Calista!";
             String text = String.format("""
-                    Hi %s 👋,
-
-                    We noticed your menstrual cycle is currently active.
-                    Don't forget to update your cycle data regularly in Calista!
-
-                    ✨ Here's a gentle reminder:
-                    • Started on: %s
-                    • Duration so far: %d days
-                    %s
-
-                    Stay healthy and let Calista be your gentle companion in understanding your body.
-
-                    With love 💗,
-                    The Calista Team
-                    """,
-                    user.getUsername(),
-                    cycle.getStartDate(),
-                    duration,
-                    duration > 15 ? "\n⚠️ Your cycle has passed 15 days. This may be considered *istihaadhah*.\nPlease consult with your doctor or religious advisor for further guidance." : ""
-            );
+            Hai %s 👋,
+        
+            Kami mendeteksi bahwa siklus haid kamu saat ini masih berlangsung.
+            Jangan lupa untuk terus memperbarui data siklus kamu secara rutin di Calista ya!
+        
+            ✨ Berikut pengingat lembut dari kami:
+            • Tanggal mulai: %s
+            • Durasi sampai hari ini: %d hari
+            %s
+        
+            🌼 Jaga selalu kesehatanmu, dan biarkan Calista menjadi teman setiamu dalam memahami tubuhmu.
+        
+            Dengan kasih 💗,
+            Tim Calista
+            """,
+                            user.getUsername(),
+                            cycle.getStartDate(),
+                            duration,
+                            duration > 15 ? """
+            
+            ⚠️ Peringatan Penting:
+            Durasi haid kamu telah melebihi 15 hari. Ini kemungkinan besar masuk kategori *istihadhah*.
+            
+            🕌 Dalam kondisi istihadhah, kamu **wajib melaksanakan ibadah wajib** seperti salat dan puasa.
+            Silakan konsultasikan dengan tenaga medis atau ustadzah untuk panduan lebih lanjut.
+            """ : ""
+                    );
 
             try {
                 emailService.sendEmail(email, subject, text);
